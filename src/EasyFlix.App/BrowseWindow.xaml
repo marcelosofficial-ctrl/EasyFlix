@@ -1,0 +1,665 @@
+<Window x:Class="EasyFlix.App.BrowseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:EasyFlix.App"
+        xmlns:core="clr-namespace:EasyFlix.Core.Models;assembly=EasyFlix.Core"
+        Title="EasyFlix" Width="1360" Height="860" MinWidth="980" MinHeight="680"
+        WindowStartupLocation="CenterScreen" Background="#05070B">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <local:ArtworkStretchConverter x:Key="ArtworkStretchConverter"/>
+        <local:LegacyArtworkVisibilityConverter x:Key="LegacyArtworkVisibilityConverter"/>
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="#DDE5F0"/>
+            <Setter Property="Background" Value="#111722"/>
+            <Setter Property="BorderBrush" Value="#1D2633"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#182131"/>
+                                <Setter TargetName="Chrome" Property="BorderBrush" Value="#5967D8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#202A3C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource SidebarButtonStyle}">
+            <Setter Property="Background" Value="#5B55C8"/>
+            <Setter Property="BorderBrush" Value="#746EEC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="DarkComboBoxItemStyle" TargetType="{x:Type ComboBoxItem}">
+            <Setter Property="Foreground" Value="#E8EDF5"/>
+            <Setter Property="Background" Value="#111722"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                        <Border x:Name="ItemChrome" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemChrome" Property="Background" Value="#232D40"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemChrome" Property="Background" Value="#343B74"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DarkComboBoxStyle" TargetType="{x:Type ComboBox}">
+            <Setter Property="Foreground" Value="#E8EDF5"/>
+            <Setter Property="Background" Value="#111722"/>
+            <Setter Property="BorderBrush" Value="#303A49"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton x:Name="DropDownToggle"
+                                          Focusable="False"
+                                          ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <Border x:Name="ComboChrome"
+                                                Background="#111722"
+                                                BorderBrush="#303A49"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="10,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="20"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}"
+                                                           Foreground="#E8EDF5"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Grid.Column="1" Text="v" Foreground="#AEB8C7"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ComboChrome" Property="BorderBrush" Value="#5967D8"/>
+                                                <Setter TargetName="ComboChrome" Property="Background" Value="#182131"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup x:Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Fade">
+                                <Border Background="#111722"
+                                        BorderBrush="#303A49"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        MinWidth="{TemplateBinding ActualWidth}"
+                                        Margin="0,4,0,0">
+                                    <ScrollViewer MaxHeight="320" CanContentScroll="True">
+                                        <StackPanel IsItemsHost="True"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="TitleCardTemplate">
+            <Button Click="TitleCard_Click" Tag="{Binding}" Width="190" Height="286" Margin="0,0,14,14"
+                    Padding="0" Background="#151A23" BorderBrush="#252D3A" BorderThickness="1"
+                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Opacity" Value="1"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Availability}" Value="{x:Static core:CatalogAvailability.Offline}">
+                                <Setter Property="Opacity" Value="0.75"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Availability}" Value="{x:Static core:CatalogAvailability.Missing}">
+                                <Setter Property="Opacity" Value="0.75"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Grid Background="#0D121B" ClipToBounds="True">
+                    <TextBlock Text="{Binding DisplayTitle}" Foreground="#374254" FontSize="17" FontWeight="SemiBold"
+                               TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" Margin="12"/>
+                    <!-- Product invariant: card artwork is center-cropped in one fixed viewport at every window size. -->
+                    <Border Opacity="0.82"
+                            Visibility="{Binding ArtworkPath, Converter={StaticResource LegacyArtworkVisibilityConverter}}"
+                            SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="HighQuality">
+                        <Border.Background>
+                            <ImageBrush ImageSource="{Binding ArtworkPath}"
+                                        Stretch="{Binding ArtworkPath, Converter={StaticResource ArtworkStretchConverter}}"
+                                        AlignmentX="Center" AlignmentY="Center"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Background="#18080B11" IsHitTestVisible="False"
+                            Visibility="{Binding ArtworkPath, Converter={StaticResource LegacyArtworkVisibilityConverter}}"/>
+                    <Border SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="HighQuality">
+                        <Border.Background>
+                            <ImageBrush ImageSource="{Binding ArtworkPath}"
+                                        Stretch="{Binding ArtworkPath, Converter={StaticResource ArtworkStretchConverter}}"
+                                        AlignmentX="Center" AlignmentY="Center"/>
+                        </Border.Background>
+                    </Border>
+                    <Border IsHitTestVisible="False">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Availability}" Value="{x:Static core:CatalogAvailability.Offline}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Availability}" Value="{x:Static core:CatalogAvailability.Missing}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+                                <GradientStop Color="#00FFFFFF" Offset="0.30"/>
+                                <GradientStop Color="#14FFFFFF" Offset="0.48"/>
+                                <GradientStop Color="#28FFFFFF" Offset="0.53"/>
+                                <GradientStop Color="#08FFFFFF" Offset="0.60"/>
+                                <GradientStop Color="#00FFFFFF" Offset="0.74"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Background="#D9141B27"
+                            BorderBrush="#536074" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="7">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Availability}" Value="{x:Static core:CatalogAvailability.Offline}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Availability}" Value="{x:Static core:CatalogAvailability.Missing}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding AvailabilityLabel}" Foreground="#F1F4F8" FontSize="9" FontWeight="SemiBold"
+                                   MaxWidth="118" TextTrimming="CharacterEllipsis"/>
+                    </Border>
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#DD141B27"
+                            BorderBrush="#354257" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="7">
+                        <TextBlock Text="{Binding Quality}" Foreground="#DCE6F5" FontSize="9" FontWeight="SemiBold"/>
+                    </Border>
+                    <Border VerticalAlignment="Bottom" Background="#BF0B0E14" Padding="10,6">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="{Binding DisplayTitle}" Foreground="#F5F7FA"
+                                       FontSize="13" FontWeight="SemiBold" LineHeight="15"
+                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="30"/>
+                            <TextBlock Grid.Row="1" Text="{Binding MetaLine}" Foreground="#C3CBD7"
+                                       FontSize="9" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Grid.Row="2" Text="{Binding AvailabilityLabel}" Foreground="#E1E6EE"
+                                       FontSize="9" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="ContinueWatchingCardTemplate">
+            <Button Click="ContinueWatching_Click" Tag="{Binding}" Width="260" Height="158" Margin="0,0,14,14"
+                    Padding="0" Background="#151A23" BorderBrush="#252D3A" BorderThickness="1"
+                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <Grid Background="#151A23">
+                    <Image Source="{Binding Title.ArtworkPath}" Stretch="Uniform" Opacity="0.9" Margin="6"/>
+                    <Border VerticalAlignment="Bottom" Background="#EE0B0E14" Padding="12,9">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Title.DisplayTitle}" Foreground="#F5F7FA" FontSize="15" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding ContextText}" Foreground="#C7D2E3" FontSize="11" Margin="0,4,0,0"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent, Mode=OneWay}" Height="5" Margin="0,7,0,5"/>
+                            <TextBlock Text="{Binding ProgressText}" Foreground="#B7C2D2" FontSize="11"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Button>
+        </DataTemplate>
+        <DataTemplate x:Key="UpNextCardTemplate">
+            <Button Click="UpNext_Click" Tag="{Binding}" Width="260" Height="158" Margin="0,0,14,14"
+                    Padding="0" Background="#151A23" BorderBrush="#252D3A" BorderThickness="1"
+                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <Grid Background="#151A23">
+                    <Image Source="{Binding Title.ArtworkPath}" Stretch="Uniform" Opacity="0.9" Margin="6"/>
+                    <Border VerticalAlignment="Bottom" Background="#EE0B0E14" Padding="12,9">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Title.DisplayTitle}" Foreground="#F5F7FA" FontSize="15" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Next.ContextLabel}" Foreground="#C7D2E3" FontSize="11" Margin="0,4,0,0"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="Next episode" Foreground="#B7C2D2" FontSize="11" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Button>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid x:Name="ShellRoot" Background="#05060A">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SidebarColumn" Width="168"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name="FullSidebar" Grid.Column="0" Background="#080B11" BorderBrush="#171E29" BorderThickness="0,0,1,0" Panel.ZIndex="2">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="FullSidebarTransform"/>
+            </Border.RenderTransform>
+            <DockPanel Margin="12,18">
+                <TextBlock DockPanel.Dock="Top" Text="EasyFlix" Foreground="White" FontSize="24" FontWeight="Bold" Margin="6,0,0,18"/>
+                <StackPanel DockPanel.Dock="Top">
+                    <Button Style="{StaticResource SidebarButtonStyle}" Tag="Home" Click="Section_Click" Content="Home" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Tag="All" Click="Section_Click" Content="All Library" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Tag="Favorites" Click="Section_Click" Content="Favorites" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Tag="Movies" Click="Section_Click" Content="Movies" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Tag="TV" Click="Section_Click" Content="TV Shows" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Tag="Anime" Click="Section_Click" Content="Anime" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Tag="Offline" Click="Section_Click" Content="Offline" Height="40" Margin="0,0,0,18"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="Refresh_Click" Content="Refresh library" Height="40" Margin="0,0,0,6"
+                            ToolTip="Local media scan only. Does not contact metadata providers."/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="SyncMetadata_Click" Content="Sync metadata" Height="40" Margin="0,0,0,6"
+                            ToolTip="Explicitly contact configured metadata providers and cache results locally."/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="AddMedia_Click" Content="Add media" Height="40" Margin="0,0,0,6"
+                            ToolTip="Naming, artwork, library setup, troubleshooting, and AI handoff guide."/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="History_Click" Content="Watch history" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="Setup_Click" Content="Setup and readiness" Height="40" Margin="0,0,0,6"/>
+                    <Button Style="{StaticResource SidebarButtonStyle}" Click="Library_Click" Content="Library maintenance" Height="40"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Border x:Name="CompactSidebar" Grid.Column="0" Background="#080B11" BorderBrush="#171E29"
+                BorderThickness="0,0,1,0" Opacity="0" IsHitTestVisible="False" Panel.ZIndex="3">
+            <StackPanel Margin="6,16">
+                <TextBlock Text="EF" Foreground="White" FontSize="17" FontWeight="Bold"
+                           HorizontalAlignment="Center" Margin="0,0,0,14"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Tag="Home" Click="Section_Click" Content="H" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Home"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Tag="All" Click="Section_Click" Content="All" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="All Library"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Tag="Favorites" Click="Section_Click" Content="Fav" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Favorites"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Tag="Movies" Click="Section_Click" Content="M" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Movies"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Tag="TV" Click="Section_Click" Content="TV" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="TV Shows"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Tag="Anime" Click="Section_Click" Content="A" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Anime"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Tag="Offline" Click="Section_Click" Content="Off" Height="36" Margin="0,0,0,12" HorizontalContentAlignment="Center" ToolTip="Offline"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="Refresh_Click" Content="R" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Refresh library locally"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="SyncMetadata_Click" Content="Sync" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Sync metadata"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="AddMedia_Click" Content="+" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Add media guide"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="History_Click" Content="Hist" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Watch history"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="Setup_Click" Content="Set" Height="36" Margin="0,0,0,5" HorizontalContentAlignment="Center" ToolTip="Setup and readiness"/>
+                <Button Style="{StaticResource SidebarButtonStyle}" Click="Library_Click" Content="Lib" Height="36" HorizontalContentAlignment="Center" ToolTip="Library maintenance"/>
+            </StackPanel>
+        </Border>
+
+        <Grid x:Name="BrowseSurface" Grid.Column="1" ClipToBounds="True">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform x:Name="BrowseSidebarTransform"/>
+                    <TranslateTransform x:Name="BrowseFocusTransform"/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Margin="28,18,28,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="360"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="BrowseHomeButton"
+                        Visibility="{Binding ShowBrowseNavigation, Converter={StaticResource BoolToVisibility}}"
+                        Click="BrowseHome_Click" Content="ΓåÉ Home"
+                        Width="92" Height="34" Margin="0,0,14,0"
+                        ToolTip="Return to Home (Esc)"/>
+                <TextBlock Grid.Column="1" Text="{Binding SectionTitle}" Foreground="#F7F9FC" FontSize="24"
+                           FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Search" Foreground="#9AA6B7" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox x:Name="SearchBox" Width="270" Height="34" TextChanged="SearchBox_TextChanged"
+                             Background="#111720" Foreground="White" BorderBrush="#2A3443" Padding="8,5"/>
+                </StackPanel>
+            </Grid>
+
+            <ScrollViewer x:Name="MainScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ScrollChanged="MainScrollViewer_ScrollChanged">
+                <Grid Margin="28,0,28,28">
+                    <StackPanel x:Name="HomeContent"
+                                Visibility="{Binding IsHome, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel.RenderTransform>
+                            <TranslateTransform x:Name="HomeTransitionTransform"/>
+                        </StackPanel.RenderTransform>
+                        <TextBlock Text="{Binding HeroEyebrow}" Foreground="#8F9BAD" FontSize="12" FontWeight="SemiBold" Margin="2,0,0,8"/>
+                        <Border x:Name="HeroFeature" Background="#121824" BorderBrush="#252E3C" BorderThickness="1" CornerRadius="10" Margin="0,0,0,22"
+                                ClipToBounds="True" Height="410" RenderTransformOrigin="0.5,0">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="HeroScaleTransform" ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                            <Grid Background="#0B1018">
+                                <Image Source="{Binding Hero.BackdropPath}" Stretch="UniformToFill" Opacity="0.62"
+                                       SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Border>
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                            <GradientStop Color="#F20B1018" Offset="0"/>
+                                            <GradientStop Color="#D90B1018" Offset="0.48"/>
+                                            <GradientStop Color="#660B1018" Offset="0.78"/>
+                                            <GradientStop Color="#220B1018" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <Grid Margin="30,26">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="190"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center" MaxWidth="820" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding HeroTitle}" Foreground="White" FontSize="38" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding HeroMeta}" Foreground="#C7D0DD" FontSize="14" Margin="0,10,0,0"/>
+                                        <TextBlock Text="{Binding HeroDescription}" Foreground="#E0E5EC" FontSize="14" Margin="0,13,0,0"
+                                                   MaxWidth="760" TextWrapping="Wrap"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,20,0,0">
+                                            <Button Style="{StaticResource AccentButtonStyle}" Click="Hero_Click" Tag="{Binding Hero}" Content="Open details" Width="130" Height="38"/>
+                                            <Button Style="{StaticResource SidebarButtonStyle}" Click="HeroPrevious_Click" Content="Previous" Width="92" Height="38"
+                                                    HorizontalContentAlignment="Center" Margin="10,0,0,0"/>
+                                            <Button Style="{StaticResource SidebarButtonStyle}" Click="HeroNext_Click" Content="Next" Width="72" Height="38"
+                                                    HorizontalContentAlignment="Center" Margin="8,0,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="#B80D121B" BorderBrush="#394354" BorderThickness="1" CornerRadius="8"
+                                            Margin="24,0,0,0" Padding="7" VerticalAlignment="Center" Height="250">
+                                        <Image Source="{Binding Hero.ArtworkPath}" Stretch="Uniform"
+                                               SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <Border x:Name="HomeRowsAnchor" Height="0"/>
+
+                        <StackPanel Visibility="{Binding HasContinueWatching, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,8">
+                            <TextBlock Text="Continue Watching" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,24">
+                                <ItemsControl ItemsSource="{Binding ContinueWatchingTitles}" ItemTemplate="{StaticResource ContinueWatchingCardTemplate}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+
+                        <StackPanel Visibility="{Binding HasUpNext, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,8">
+                            <TextBlock Text="Up Next" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,24">
+                                <ItemsControl ItemsSource="{Binding UpNextTitles}" ItemTemplate="{StaticResource UpNextCardTemplate}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+
+                        <TextBlock Text="Recently available" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,24">
+                            <ItemsControl ItemsSource="{Binding HomeTitles}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <TextBlock Text="Movies" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,24">
+                            <ItemsControl ItemsSource="{Binding MovieTitles}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <TextBlock Text="TV Shows" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,24">
+                            <ItemsControl ItemsSource="{Binding TvTitles}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <TextBlock Text="Anime" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,24">
+                            <ItemsControl ItemsSource="{Binding AnimeTitles}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <StackPanel Visibility="{Binding HasOfflineTitles, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="Offline and missing" Foreground="White" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding OfflineTitles}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding IsAllLibrary, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="All Library" Foreground="White" FontSize="30" FontWeight="Bold" Margin="0,6,0,8"/>
+                        <TextBlock Text="Browse every title once, then choose a combined grid or Movies / TV Shows / Anime sections."
+                                   Foreground="#9AA6B7" FontSize="13" Margin="0,0,0,16"/>
+
+                        <Border Background="#101620" BorderBrush="#27303D" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,22">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="View" Foreground="#AEB8C7" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <ComboBox Style="{StaticResource DarkComboBoxStyle}" Width="150" ItemsSource="{Binding AllLibraryViewModes}"
+                                          SelectedItem="{Binding AllLibraryViewMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,16,0"/>
+                                <TextBlock Text="Type" Foreground="#AEB8C7" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <ComboBox Style="{StaticResource DarkComboBoxStyle}" Width="150" ItemsSource="{Binding AllLibraryTypeFilters}"
+                                          SelectedItem="{Binding AllLibraryTypeFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,16,0"/>
+                                <TextBlock Text="Sort" Foreground="#AEB8C7" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <ComboBox Style="{StaticResource DarkComboBoxStyle}" Width="175" ItemsSource="{Binding AllLibrarySortModes}"
+                                          SelectedItem="{Binding AllLibrarySortMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Visibility="{Binding IsAllLibraryGrouped, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel Visibility="{Binding ShowAllLibraryMoviesSection, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="Movies" Foreground="White" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                <ItemsControl ItemsSource="{Binding AllLibraryMovies}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel Visibility="{Binding ShowAllLibraryTvShowsSection, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="TV Shows" Foreground="White" FontSize="22" FontWeight="SemiBold" Margin="0,18,0,12"/>
+                                <ItemsControl ItemsSource="{Binding AllLibraryTvShows}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel Visibility="{Binding ShowAllLibraryAnimeSection, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="Anime" Foreground="White" FontSize="22" FontWeight="SemiBold" Margin="0,18,0,12"/>
+                                <ItemsControl ItemsSource="{Binding AllLibraryAnime}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <ItemsControl Visibility="{Binding IsAllLibraryCombined, Converter={StaticResource BoolToVisibility}}"
+                                      ItemsSource="{Binding AllLibraryTitles}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding IsBrowseSection, Converter={StaticResource BoolToVisibility}}">
+                        <Border Visibility="{Binding ShowFavoritesEmptyState, Converter={StaticResource BoolToVisibility}}"
+                                Background="#101620" BorderBrush="#27303D" BorderThickness="1" CornerRadius="10"
+                                Padding="20" Margin="0,0,0,18">
+                            <StackPanel>
+                                <TextBlock Text="No favorites yet."
+                                           Foreground="#E7ECF4" FontSize="16" FontWeight="SemiBold"/>
+                                <TextBlock Text="Open any title and choose Add to Favorites to keep it here."
+                                           Foreground="#9AA6B7" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Visibility="{Binding ShowOfflineEmptyState, Converter={StaticResource BoolToVisibility}}"
+                                Background="#101620" BorderBrush="#27303D" BorderThickness="1" CornerRadius="10"
+                                Padding="20" Margin="0,0,0,18">
+                            <StackPanel>
+                                <TextBlock Text="Everything in your catalog is currently available."
+                                           Foreground="#E7ECF4" FontSize="16" FontWeight="SemiBold"/>
+                                <TextBlock Text="If a configured drive goes offline or a previously known file disappears, EasyFlix will keep it in the catalog and show it here."
+                                           Foreground="#9AA6B7" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding BrowseTitles}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding IsSearchActive, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="Search results" Foreground="White" FontSize="30" FontWeight="Bold" Margin="0,6,0,18"/>
+                        <Border Visibility="{Binding ShowSearchEmptyState, Converter={StaticResource BoolToVisibility}}"
+                                Background="#101620" BorderBrush="#27303D" BorderThickness="1" CornerRadius="10"
+                                Padding="20" Margin="0,0,0,18">
+                            <StackPanel>
+                                <TextBlock Text="No titles match your search."
+                                           Foreground="#E7ECF4" FontSize="16" FontWeight="SemiBold"/>
+                                <TextBlock Text="Try another title, year, or type, or clear the search to return to your library."
+                                           Foreground="#9AA6B7" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,12"/>
+                                <Button Style="{StaticResource SidebarButtonStyle}" Click="ClearSearch_Click"
+                                        Content="Clear search" Width="120" Height="34"
+                                        HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding SearchResults}" ItemTemplate="{StaticResource TitleCardTemplate}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <Border Grid.Row="2" Background="#0D1118" BorderBrush="#1D2430" BorderThickness="0,1,0,0" Padding="28,10">
+                <TextBlock Text="{Binding StatusText}" Foreground="#AAB4C4" FontSize="12"/>
+            </Border>
+        </Grid>
+
+        <Grid x:Name="FocusedTitleHost" Grid.Column="1" Background="#52000000" Opacity="0"
+              IsHitTestVisible="False" Panel.ZIndex="5" ClipToBounds="True">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="FocusedTitleTransform" X="36"/>
+            </Grid.RenderTransform>
+            <Border x:Name="FocusedTitlePanel"
+                    Background="#E60B0E14" BorderBrush="#344154" BorderThickness="1"
+                    CornerRadius="18" ClipToBounds="True"
+                    Margin="48,38" MaxWidth="1480" MaxHeight="900"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#D90D1118" BorderBrush="#263143"
+                            BorderThickness="0,0,0,1" Padding="20,12">
+                        <DockPanel>
+                            <Button x:Name="FocusedBackButton" DockPanel.Dock="Left"
+                                    Click="BackFromDetails_Click" Content="ΓåÉ Back"
+                                    Width="96" Height="36" HorizontalAlignment="Left"/>
+                            <TextBlock Text="Title details" Foreground="#9AA6B7" FontSize="12"
+                                       VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        </DockPanel>
+                    </Border>
+                    <ContentControl x:Name="FocusedTitleContent" Grid.Row="1"
+                                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border x:Name="StartupOverlay"
+                Grid.ColumnSpan="2"
+                Background="#05060A"
+                Panel.ZIndex="100"
+                IsHitTestVisible="True">
+            <Grid>
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Width="360">
+                    <Border Width="112" Height="112"
+                            HorizontalAlignment="Center"
+                            Background="#080A10"
+                            BorderBrush="#7B6CFF"
+                            BorderThickness="3"
+                            CornerRadius="26">
+                        <Grid>
+                            <Ellipse Width="72" Height="72"
+                                     Fill="#345B55C8"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                            <Polygon Points="40,29 40,83 82,56"
+                                     Fill="#F8FAFF"
+                                     Stretch="None"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                            <Ellipse Width="12" Height="12"
+                                     Fill="#35D3FF"
+                                     Margin="0,17,17,0"
+                                     HorizontalAlignment="Right"
+                                     VerticalAlignment="Top"/>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="EasyFlix"
+                               Foreground="#F8FAFF"
+                               FontSize="34"
+                               FontWeight="SemiBold"
+                               TextAlignment="Center"
+                               Margin="0,24,0,0"/>
+                    <TextBlock Text="Your library, local first."
+                               Foreground="#8E9AAD"
+                               FontSize="13"
+                               TextAlignment="Center"
+                               Margin="0,7,0,22"/>
+                    <ProgressBar IsIndeterminate="True"
+                                 Height="3"
+                                 Width="172"
+                                 Foreground="#7B6CFF"
+                                 Background="#171B26"
+                                 BorderThickness="0"
+                                 HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

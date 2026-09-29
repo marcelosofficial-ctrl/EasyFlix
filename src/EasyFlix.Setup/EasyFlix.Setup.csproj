@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>EasyFlix.Setup</AssemblyName>
+    <ApplicationIcon>..\EasyFlix.App\Assets\EasyFlix.ico</ApplicationIcon>
+    <Version>1.4.0</Version>
+    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+    <FileVersion>1.4.0.0</FileVersion>
+    <InformationalVersion>1.4.0</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <Authors>EasyFlix contributors</Authors>
+    <Description>Per-user EasyFlix Windows installer and uninstaller.</Description>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EasyFlixPayloadPath)' != '' and Exists('$(EasyFlixPayloadPath)')">
+    <EmbeddedResource Include="$(EasyFlixPayloadPath)" LogicalName="EasyFlix.Payload.exe" />
+  </ItemGroup>
+
+</Project>

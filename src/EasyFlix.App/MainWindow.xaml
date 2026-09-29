@@ -1,0 +1,239 @@
+<Window x:Class="EasyFlix.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EasyFlix Setup" Width="1280" Height="820" MinWidth="980" MinHeight="640"
+        Background="#0B0D12" Foreground="#F6F7FB" WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI" FontSize="14" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display" TextOptions.TextRenderingMode="ClearType">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Panel" Color="#141821"/>
+        <SolidColorBrush x:Key="Panel2" Color="#1B202C"/>
+        <SolidColorBrush x:Key="Muted" Color="#B4BDCC"/>
+        <SolidColorBrush x:Key="Accent" Color="#8B7CFF"/>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#252B38"/><Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Margin" Value="0,0,8,0"/><Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#1B202A"/>
+                    <Setter Property="Foreground" Value="#6E7788"/>
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#0F1219"/><Setter Property="Foreground" Value="#F6F7FB"/>
+            <Setter Property="BorderBrush" Value="#3A4355"/><Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="SelectionBrush" Value="#655AC7"/><Setter Property="Padding" Value="10"/>
+        </Style>
+        <Style TargetType="DataGridCell">
+            <Setter Property="Foreground" Value="#F6F7FB"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#303746"/>
+            <Setter Property="Padding" Value="5,3"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#39345F"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="DataGridRow">
+            <Setter Property="Foreground" Value="#F6F7FB"/>
+            <Setter Property="MinHeight" Value="31"/>
+            <Setter Property="Background" Value="#10131A"/>
+            <Setter Property="BorderBrush" Value="#252C39"/>
+            <Style.Triggers>
+                <Trigger Property="AlternationIndex" Value="1"><Setter Property="Background" Value="#151A24"/></Trigger>
+                <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#302C50"/></Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Foreground" Value="#F6F7FB"/>
+            <Setter Property="Background" Value="#202634"/>
+            <Setter Property="BorderBrush" Value="#353D4E"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="Padding" Value="7,5"/>
+        </Style>
+        <ControlTemplate x:Key="FlatGroupTemplate" TargetType="{x:Type GroupItem}">
+            <ItemsPresenter/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="CategoryGroupTemplate" TargetType="{x:Type GroupItem}">
+            <Expander IsExpanded="True" Margin="0,2,0,5">
+                <Expander.Header>
+                    <DockPanel Margin="4,8">
+                        <Border DockPanel.Dock="Right" Background="#252B38" CornerRadius="10" Padding="8,2" Margin="10,0,0,0">
+                            <TextBlock Text="{Binding ItemCount}" Foreground="{StaticResource Muted}" FontSize="11"/>
+                        </Border>
+                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource Accent}" FontWeight="SemiBold" FontSize="15"/>
+                    </DockPanel>
+                </Expander.Header>
+                <ItemsPresenter Margin="14,0,0,0"/>
+            </Expander>
+        </ControlTemplate>
+        <ControlTemplate x:Key="SeriesGroupTemplate" TargetType="{x:Type GroupItem}">
+            <Expander IsExpanded="False" Margin="0,1,0,4">
+                <Expander.Header>
+                    <DockPanel Margin="4,7">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Text="{Binding ItemCount, StringFormat={}{0} items}" Foreground="{StaticResource Muted}" FontSize="11" Margin="10,2,0,0"/>
+                    </DockPanel>
+                </Expander.Header>
+                <ItemsPresenter Margin="15,0,0,0"/>
+            </Expander>
+        </ControlTemplate>
+        <ControlTemplate x:Key="SeasonGroupTemplate" TargetType="{x:Type GroupItem}">
+            <Expander IsExpanded="False" Margin="0,1,0,3">
+                <Expander.Header>
+                    <TextBlock Text="{Binding Name}" Foreground="#BEC4D2" FontWeight="SemiBold" Margin="4,6"/>
+                </Expander.Header>
+                <ItemsPresenter Margin="15,0,0,0"/>
+            </Expander>
+        </ControlTemplate>
+        <Style x:Key="CategoryGroupStyle" TargetType="{x:Type GroupItem}">
+            <Setter Property="Template" Value="{StaticResource CategoryGroupTemplate}"/>
+        </Style>
+        <Style x:Key="SeriesGroupStyle" TargetType="{x:Type GroupItem}">
+            <Setter Property="Template" Value="{StaticResource SeriesGroupTemplate}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Name}" Value="">
+                    <Setter Property="Template" Value="{StaticResource FlatGroupTemplate}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SeasonGroupStyle" TargetType="{x:Type GroupItem}">
+            <Setter Property="Template" Value="{StaticResource SeasonGroupTemplate}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Name}" Value="">
+                    <Setter Property="Template" Value="{StaticResource FlatGroupTemplate}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="28">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="18"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="EASYFLIX" Foreground="{StaticResource Accent}" FontWeight="SemiBold" FontSize="13"/>
+                <TextBlock Text="Your media. One private stream." FontSize="30" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                <TextBlock Text="Safe library setup and migration tools. The cinematic browser is built on top of this foundation." Foreground="{StaticResource Muted}" Margin="0,6,0,0"/>
+            </StackPanel>
+            <Border Grid.Column="1" Background="#17251F" CornerRadius="12" Padding="16,10" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal"><Ellipse Fill="#42D392" Width="8" Height="8" Margin="0,0,8,0"/><TextBlock Text="Safety mode on" Foreground="#9BE8C4"/></StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="330"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Border Background="{StaticResource Panel}" CornerRadius="16" Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="LIBRARY SETUP" FontSize="12" Foreground="{StaticResource Muted}" FontWeight="SemiBold"/>
+                        <TextBlock Text="Media locations" FontWeight="SemiBold" Margin="0,18,0,7"/>
+                        <TextBlock Text="One folder or drive per line" Foreground="{StaticResource Muted}" FontSize="12" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding SourceRoots, UpdateSourceTrigger=PropertyChanged}" Height="108" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                        <Button Content="Add media folderΓÇª" Click="AddMediaFolder_Click" Margin="0,8,0,0" ToolTip="Choose a folder or an entire drive without typing its path"/>
+                        <TextBlock Text="Never scan" FontWeight="SemiBold" Margin="0,18,0,7"/>
+                        <TextBlock Text="Excluded folders, one per line" Foreground="{StaticResource Muted}" FontSize="12" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding ExcludedPaths, UpdateSourceTrigger=PropertyChanged}" Height="82" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                        <Button Content="Add excluded folderΓÇª" Click="AddExcludedFolder_Click" Margin="0,8,0,0" ToolTip="ReelShelf will never traverse this folder"/>
+                        <TextBlock Text="Unified library" FontWeight="SemiBold" Margin="0,18,0,7"/>
+                        <TextBox Text="{Binding LibraryPath, UpdateSourceTrigger=PropertyChanged}"/>
+                        <UniformGrid Columns="2" Margin="0,8,0,0">
+                            <Button Content="ChooseΓÇª" Click="ChooseLibrary_Click" Margin="0,0,5,0"/>
+                            <Button Content="Open library" Click="OpenLibrary_Click" Margin="5,0,0,0"/>
+                        </UniformGrid>
+                        <Button Click="ProviderSettings_Click" Margin="0,12,0,0" Content="Configure providers"/>
+                        <Button Command="{Binding ScanCommand}" Background="{StaticResource Accent}" FontWeight="SemiBold" Margin="0,22,0,0" Content="Scan safely"/>
+                        <Border Background="{StaticResource Panel2}" CornerRadius="12" Padding="14" Margin="0,18,0,0">
+                            <StackPanel>
+                                <TextBlock Text="PROVIDER PIPELINE" FontSize="11" Foreground="{StaticResource Muted}"/>
+                                <TextBlock Text="Artwork" Margin="0,10,0,0"/><TextBlock Text="TVmaze: no key ┬╖ TMDB: movie key" Foreground="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap"/>
+                                <TextBlock Text="Subtitles" Margin="0,10,0,0"/><TextBlock Text="FFprobe audit ┬╖ SubDL + OpenSubtitles verified SRT" Foreground="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap"/>
+                                <TextBlock Text="Offline fallback" Margin="0,10,0,0"/><TextBlock Text="Whisper Small ┬╖ local CPU ┬╖ resumable" Foreground="{StaticResource Muted}" FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="14"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <UniformGrid Rows="1" Columns="3">
+                    <Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="0,0,10,0"><StackPanel><TextBlock Text="MOVIES" Foreground="{StaticResource Muted}" FontSize="11"/><TextBlock Text="{Binding MovieCount}" FontSize="25" FontWeight="SemiBold" Margin="0,5,0,0"/></StackPanel></Border>
+                    <Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18" Margin="0,0,10,0"><StackPanel><TextBlock Text="TV SHOWS" Foreground="{StaticResource Muted}" FontSize="11"/><TextBlock Text="{Binding TvCount}" FontSize="25" FontWeight="SemiBold" Margin="0,5,0,0"/></StackPanel></Border>
+                    <Border Background="{StaticResource Panel}" CornerRadius="14" Padding="18"><StackPanel><TextBlock Text="ANIME" Foreground="{StaticResource Muted}" FontSize="11"/><TextBlock Text="{Binding AnimeCount}" FontSize="25" FontWeight="SemiBold" Margin="0,5,0,0"/></StackPanel></Border>
+                </UniformGrid>
+                <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="16" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <DockPanel>
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
+                                <TextBlock Text="Find" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="260" Margin="0,0,12,0" ToolTip="Filter by title, series, filename, or location"/>
+                                <Button Content="All" Command="{Binding SelectAllCommand}"/>
+                                <Button Content="None" Command="{Binding SelectNoneCommand}"/>
+                            </StackPanel>
+                            <TextBlock Text="Preview" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <DataGrid Grid.Row="2" x:Name="PreviewGrid" ItemsSource="{Binding ItemsView}" AutoGenerateColumns="False" CanUserAddRows="False"
+                                  Background="#10131A" Foreground="#E9EBF2" BorderThickness="0" GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="#303746" AlternationCount="2"
+                                  HeadersVisibility="Column" SelectionMode="Extended"
+                                  MouseDoubleClick="PreviewGrid_MouseDoubleClick" ToolTip="Double-click a media row to show its original location"
+                                  VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                  VirtualizingPanel.VirtualizationMode="Recycling">
+                            <DataGrid.GroupStyle>
+                                <GroupStyle ContainerStyle="{StaticResource CategoryGroupStyle}"/>
+                                <GroupStyle ContainerStyle="{StaticResource SeriesGroupStyle}"/>
+                                <GroupStyle ContainerStyle="{StaticResource SeasonGroupStyle}"/>
+                            </DataGrid.GroupStyle>
+                            <DataGrid.Columns>
+                                <DataGridCheckBoxColumn Header="Add" Binding="{Binding IsSelected}" Width="64" MinWidth="64"/>
+                                <DataGridTemplateColumn Header="Type" Width="110" MinWidth="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate><TextBlock Text="{Binding KindLabel}" Foreground="#F6F7FB" VerticalAlignment="Center"/></DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.MediaKinds, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                      SelectedItem="{Binding Kind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Clean library name" Binding="{Binding SuggestedName}" Width="360" MinWidth="320"/>
+                                <DataGridTextColumn Header="Quality" Binding="{Binding Quality}" Width="100" MinWidth="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Files" Binding="{Binding VideoCount}" Width="70" MinWidth="70" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Subtitles" Binding="{Binding SubtitleStatus}" Width="165" MinWidth="150" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Artwork" Binding="{Binding ArtworkStatus}" Width="160" MinWidth="145" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Original location" Binding="{Binding SourcePath}" Width="*" MinWidth="360" IsReadOnly="True"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Margin="0,16,0,0">
+            <TextBlock Text="{Binding Status}" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis" Margin="0,0,0,10"/>
+            <ProgressBar Height="4" IsIndeterminate="{Binding IsBusy}" Value="0" Maximum="100" Margin="0,0,0,10"
+                         Background="#1B202C" Foreground="#8B7CFF" BorderThickness="0" ToolTip="Animated while ReelShelf is working"/>
+            <WrapPanel HorizontalAlignment="Right">
+                <Button Content="Cancel current task" Command="{Binding CancelCommand}" Background="#623643"/>
+                <Button Content="Audit subtitles" Command="{Binding AuditCommand}"/>
+                <Button Content="Get safe SRTs" Command="{Binding DownloadSubtitlesCommand}"/>
+                <Button Content="Generate locally" Command="{Binding GenerateLocalSubtitlesCommand}"/>
+                <Button Content="Find covers" Command="{Binding ArtworkCommand}"/>
+                <Button Content="Activity" Click="Activity_Click"/>
+                <Button Content="Create shortcuts" Command="{Binding ApplyCommand}"/>
+                <Button Content="Run unattended" Command="{Binding WorkflowCommand}" Background="#42A675" FontWeight="SemiBold" Margin="0" ToolTip="Covers, safe downloads, local fallback, and shortcuts in one resumable run"/>
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</Window>

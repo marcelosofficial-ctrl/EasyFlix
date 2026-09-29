@@ -1,0 +1,28 @@
+name: Manual Windows build and test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore EasyFlix.slnx
+
+      - name: Build Release
+        run: dotnet build EasyFlix.slnx -c Release --no-restore --nologo
+
+      - name: Test Release
+        run: dotnet test EasyFlix.slnx -c Release --no-build --no-restore --nologo

@@ -1,0 +1,72 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+artifacts/
+publish/
+
+# Visual Studio / IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test / coverage
+TestResults/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# Logs / diagnostics
+*.log
+logs/
+diagnostics/
+
+# Local databases / runtime state
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Local secrets / environment files
+.env
+.env.*
+secrets.json
+credentials.json
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Certificates / private keys
+*.pfx
+*.p12
+*.pem
+*.key
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# EasyFlix local/private data
+.local/
+cache/
+metadata-cache/
+artwork-cache/
+media-index/
+library-data/
+
+# Personal media must never be committed
+media/
+movies/
+tv/
+anime/
+subtitles/

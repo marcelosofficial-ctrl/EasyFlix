@@ -1,0 +1,63 @@
+<Window x:Class="EasyFlix.App.FirstRunWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EasyFlix setup" Width="760" Height="560" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" Background="#0B0E14" Foreground="White">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="Welcome to EasyFlix" FontSize="30" FontWeight="SemiBold"/>
+            <TextBlock Text="Configure the local pieces that power your library. EasyFlix does not move or rewrite your media."
+                       Foreground="#AEB8C7" TextWrapping="Wrap" Margin="0,8,0,18"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1">
+            <Border Background="#121722" BorderBrush="#27303D" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="1. Media library" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="LibraryStatus" Foreground="#AEB8C7" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Configure library" Width="150" Height="34" Margin="16,0,0,0"
+                            VerticalAlignment="Center" Click="ConfigureLibrary_Click"/>
+                </Grid>
+            </Border>
+
+            <Border Background="#121722" BorderBrush="#27303D" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="2. mpv playback" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="PlaybackStatus" Foreground="#AEB8C7" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Playback settings" Width="150" Height="34" Margin="16,0,0,0"
+                            VerticalAlignment="Center" Click="ConfigurePlayback_Click"/>
+                </Grid>
+            </Border>
+
+            <Border Background="#121722" BorderBrush="#27303D" BorderThickness="1" CornerRadius="8" Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="3. Metadata and subtitles" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock Text="Provider credentials are optional and can improve metadata and subtitle workflows."
+                                   Foreground="#AEB8C7" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Provider settings" Width="150" Height="34" Margin="16,0,0,0"
+                            VerticalAlignment="Center" Click="ConfigureProviders_Click"/>
+                </Grid>
+            </Border>
+
+            <TextBlock x:Name="ReadinessSummary" Foreground="#EBCB78" Margin="0,16,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Button Grid.Row="2" Content="Continue to EasyFlix" Width="160" Height="38"
+                HorizontalAlignment="Right" Click="Continue_Click"/>
+    </Grid>
+</Window>

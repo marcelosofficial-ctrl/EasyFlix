@@ -1,0 +1,63 @@
+<Window x:Class="EasyFlix.App.PlaybackSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Playback settings" Width="720" Height="560" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" Background="#0B0E14" Foreground="White">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="Playback settings" FontSize="26" FontWeight="SemiBold"/>
+            <TextBlock Text="EasyFlix can track playback with mpv or VLC. mpv also supports verified audio/subtitle selection; VLC supports tracked resume, history, completion, and Up Next."
+                       Foreground="#AEB8C7" TextWrapping="Wrap" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="#121722" BorderBrush="#27303D" BorderThickness="1"
+                CornerRadius="8" Padding="16" Margin="0,18,0,18">
+            <StackPanel>
+                <TextBlock Text="mpv executable" Foreground="#AEB8C7" Margin="0,0,0,6"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="MpvPath" Height="34" VerticalContentAlignment="Center"
+                             Background="#0F141D" Foreground="White" BorderBrush="#27303D"/>
+                    <Button Grid.Column="1" Content="Auto-detect" Width="100" Margin="8,0,0,0" Click="AutoDetect_Click"/>
+                    <Button Grid.Column="2" Content="Browse" Width="90" Margin="8,0,0,0" Click="Browse_Click"/>
+                </Grid>
+                <TextBlock x:Name="MpvStatus" Foreground="#EBCB78" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                <TextBlock Text="EasyFlix checks PATH plus common WinGet, Scoop, Chocolatey, and Program Files locations."
+                           Foreground="#7F8A9A" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"/>
+
+                <Border Height="1" Background="#27303D" Margin="0,18,0,18"/>
+
+                <TextBlock Text="VLC executable" Foreground="#AEB8C7" Margin="0,0,0,6"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="VlcPath" Height="34" VerticalContentAlignment="Center"
+                             Background="#0F141D" Foreground="White" BorderBrush="#27303D"/>
+                    <Button Grid.Column="1" Content="Auto-detect" Width="100" Margin="8,0,0,0" Click="AutoDetectVlc_Click"/>
+                    <Button Grid.Column="2" Content="Browse" Width="90" Margin="8,0,0,0" Click="BrowseVlc_Click"/>
+                </Grid>
+                <TextBlock x:Name="VlcStatus" Foreground="#EBCB78" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                <TextBlock Text="Tracked VLC playback uses VLC's local control interface only. No remote network service is exposed by EasyFlix."
+                           Foreground="#7F8A9A" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancel" Width="90" Margin="0,0,8,0" Click="Cancel_Click"/>
+            <Button Content="Save" Width="90" Click="Save_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

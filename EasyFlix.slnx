@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="tests/EasyFlix.Core.Tests/EasyFlix.Core.Tests.csproj" />
+  </Folder>
+  <Project Path="src/EasyFlix.Core/EasyFlix.Core.csproj" />
+  <Project Path="src/EasyFlix.App/EasyFlix.App.csproj" />
+</Solution>

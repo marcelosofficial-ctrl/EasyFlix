@@ -1,0 +1,9 @@
+<Project>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'EasyFlix.Core'">
+    <Compile Remove="$(MSBuildProjectDirectory)\Services\MediaNameParser.cs" />
+    <Compile Remove="$(MSBuildProjectDirectory)\Services\TvMazeArtworkProvider.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'EasyFlix.Core.Tests'">
+    <Compile Remove="$(MSBuildProjectDirectory)\MediaNameParserTests.cs" />
+  </ItemGroup>
+</Project>
